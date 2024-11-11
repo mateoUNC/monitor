@@ -7,13 +7,15 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/prometheus-client-c/prom/include
     ${CMAKE_SOURCE_DIR}/prometheus-client-c/promhttp/include
     ${CMAKE_SOURCE_DIR}/prometheus-client-c/deps
+    ${MICROHTTPD_INCLUDE_DIRS}
 )
 
 # Buscar paquetes necesarios
 find_package(cJSON REQUIRED)
 find_package(CURL REQUIRED)
 find_package(Threads REQUIRED)
-find_package(MicroHTTPD REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(MICROHTTPD REQUIRED libmicrohttpd)
 
 # Definir las bibliotecas 'prom' y 'promhttp' como importadas
 add_library(prom STATIC IMPORTED)
@@ -43,7 +45,7 @@ target_link_libraries(metricShell PRIVATE
     promhttp
     CURL::libcurl
     Threads::Threads
-    MicroHTTPD::microhttpd
+    ${MICROHTTPD_LIBRARIES}
 )
 
 # Opcional: Añadir flags de compilación para advertencias
