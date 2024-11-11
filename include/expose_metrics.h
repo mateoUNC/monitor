@@ -4,16 +4,16 @@
  */
 
 #include "metrics.h"
+#include <cjson/cJSON.h>
+#include <config.h>
 #include <errno.h>
-#include <prom.h>
-#include <promhttp.h>
+#include <../prometheus-client-c/prom/include/prom.h>
+#include <../prometheus-client-c/promhttp/include/promhttp.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h> // Para sleep
-#include <cjson/cJSON.h>
-#include <config.h>
 
 /**
  * @brief Tamaño del buffer utilizado para leer datos del sistema.

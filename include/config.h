@@ -10,7 +10,8 @@
 /**
  * @brief Estructura de informacion de monitor.
  */
-typedef struct {
+typedef struct
+{
     int sampling_interval;          /**< Intervalo de muestreo en segundos */
     bool collect_cpu;               /**< Recopila información de CPU si es true */
     bool collect_memory;            /**< Recopila información de memoria si es true */
@@ -24,8 +25,8 @@ typedef struct {
 /**
  * @brief Carga la configuración desde un archivo JSON.
  *
- * Esta función abre el archivo JSON especificado, lo analiza y carga la configuración 
- * en la estructura `config_t`, asignando valores predeterminados si algunas opciones no están presentes.
+ * Esta función abre el archivo JSON especificado, lo analiza y carga la configuración
+ * en la estructura config_t, asignando valores predeterminados si algunas opciones no están presentes.
  *
  * @param filename Nombre del archivo de configuración JSON.
  * @param config Puntero a la estructura `config_t` donde se almacenará la configuración cargada.

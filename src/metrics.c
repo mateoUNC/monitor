@@ -1,12 +1,12 @@
 #include "metrics.h"
 #include <ctype.h>
+#include <fcntl.h> // Para open
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h> // Para open
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 // obtenemos los datos de la red de forma parecida a como obtubimos los datos de memoria.
 extern pthread_mutex_t lock; // Asegúrate de que el mutex sea accesible
 
@@ -84,7 +84,6 @@ net_stats_t get_net_stats(const char* iface)
 
     return stats;
 }
-
 
 disk_stats_t get_disk_stats(const char* device)
 {

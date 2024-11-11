@@ -6,7 +6,7 @@ include_directories(${CMAKE_SOURCE_DIR}/monitor/include)
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-# Añadir el ejecutable con el nombre "metricShell"
+# Añadir el ejecutable con el nombre "metricShell".
 add_executable(metricShell
     src/main.c
     src/metrics.c
