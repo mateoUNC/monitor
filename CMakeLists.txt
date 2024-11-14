@@ -10,6 +10,12 @@ find_package(Threads REQUIRED)
 
 # Incluir directorios de encabezados
 include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src
+)
+
+# Incluir directorios de encabezados
+include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/prometheus-client-c/prom/include
     ${CMAKE_SOURCE_DIR}/prometheus-client-c/promhttp/include
