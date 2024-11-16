@@ -15,6 +15,30 @@
 #include <unistd.h>   // For write, close, sleep, readlink
 
 /**
+ * @brief Funcion que busca el disco local.
+ */
+const char* detect_disk() {
+    FILE *fp;
+    static char device[256];
+
+    // Ejecuta el comando lsblk para obtener dispositivos
+    fp = popen("lsblk -nd -o NAME | head -n 1", "r");
+    if (fp == NULL) {
+        perror("Error ejecutando lsblk");
+        return "sda"; // Valor predeterminado
+    }
+
+    if (fgets(device, sizeof(device), fp) != NULL) {
+        device[strcspn(device, "\n")] = 0; // Quita el salto de línea
+    } else {
+        strncpy(device, "sda", sizeof(device)); // Valor predeterminado
+    }
+
+    pclose(fp);
+    return device;
+}
+
+/**
  * @brief Función principal del sistema.
  */
 int main(int argc, char* argv[])
@@ -55,7 +79,10 @@ int main(int argc, char* argv[])
 
         if (config.collect_disk)
         {
-            update_disk_stats_gauge("nvme0n1");
+            const char *disk = detect_disk();
+            char disk_path[256];
+            snprintf(disk_path, sizeof(disk_path), "/dev/%s", disk);
+            update_disk_stats_gauge(disk_path);
         }
 
         if (config.collect_net)
