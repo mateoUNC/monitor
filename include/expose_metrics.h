@@ -7,8 +7,8 @@
 #include <cjson/cJSON.h>
 #include <config.h>
 #include <errno.h>
-#include <../prometheus-client-c/prom/include/prom.h>
-#include <../prometheus-client-c/promhttp/include/promhttp.h>
+#include <prom.h>
+#include <promhttp.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,3 +65,5 @@ void init_metrics();
  * @brief Destructor de mutex
  */
 void destroy_mutex(void);
+
+void update_memory_fragmentation_gauge();

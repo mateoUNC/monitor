@@ -18,8 +18,11 @@ typedef struct
     bool collect_disk;              /**< Recopila información de disco si es true */
     bool collect_net;               /**< Recopila información de red si es true */
     bool collect_context_switches;  /**< Recopila cambios de contexto si es true */
+    bool collect_memory_fragmentation; /**< Fragmentacion de memoria */
     bool collect_running_processes; /**< Recopila número de procesos activos si es true */
     char log_file[256];             /**< Ruta al archivo de log */
+    int allocation_method;          /**< Metodo de alocacion */
+
 } config_t;
 
 /**

@@ -1,4 +1,6 @@
 #include "expose_metrics.h"
+#include "memory.h"
+
 // Mutex para sincronización de hilos
 pthread_mutex_t lock;
 
@@ -12,6 +14,12 @@ static prom_gauge_t* context_switches_metric;  // Metricas para cambios de conte
 static prom_gauge_t* running_processes_metric; // Metricas para cantidad de procesos corriendo
 static prom_gauge_t* disk_reads_completed_metric;
 static prom_gauge_t* disk_writes_completed_metric;
+// Declaración de las métricas
+static prom_gauge_t* cpu_usage_metric;
+static prom_gauge_t* rx_bytes_metric;
+static prom_gauge_t* tx_bytes_metric;
+static prom_gauge_t* memory_fragmentation_metric; // Agrega esta línea
+
 // Esta funcion sirve para actualizar el dato desde /proc/stat para obtener el ultimo valor de Cpu_Usage
 void update_cpu_gauge()
 {
@@ -118,6 +126,15 @@ void update_memory_gauge()
         fprintf(stderr, "Error al obtener la información de memoria\n");
     }
 }
+
+void update_memory_fragmentation_gauge() {
+    double fragmentation = calculate_memory_fragmentation();
+    pthread_mutex_lock(&lock);
+    prom_gauge_set(memory_fragmentation_metric, fragmentation, NULL);
+    pthread_mutex_unlock(&lock);
+}
+
+
 
 void* expose_metrics(void* arg)
 {
@@ -252,7 +269,21 @@ void init_metrics()
         fprintf(stderr, "Error al registrar la métrica de cambios de contexto\n");
         return;
     }
+
+    memory_fragmentation_metric = prom_gauge_new("heap_memory_fragmentation_percentage", "Fragmentacion del heap en porcentaje", 0, NULL);
+    if (memory_fragmentation_metric == NULL) {
+        fprintf(stderr, "Error al crear la métrica de fragmentación de memoria\n");
+        return;
+    }
+
+    // Registrar la métrica de fragmentación de memoria
+    if (prom_collector_registry_must_register_metric(memory_fragmentation_metric) == 0) {
+        fprintf(stderr, "Error al registrar la métrica de fragmentación de memoria\n");
+        return;
+    }
 }
+
+
 void destroy_mutex()
 {
     pthread_mutex_destroy(&lock);

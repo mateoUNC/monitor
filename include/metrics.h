@@ -88,5 +88,3 @@ memory_info_t get_memory_usage(void);
  * @return Uso de CPU como porcentaje (0.0 a 100.0), o -1.0 en caso de error.
  */
 double get_cpu_usage(void);
-
-void process_commands_from_shell();

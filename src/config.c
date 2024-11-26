@@ -1,7 +1,7 @@
 // config.c
 #include "config.h"
+#include "memory.h" // Incluir memory.h
 #include "expose_metrics.h"
-
 #include <cjson/cJSON.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -55,6 +55,7 @@ bool load_config(const char* filename, config_t* config)
     // Inicializar todas las métricas en falso
     config->collect_cpu = config->collect_memory = config->collect_disk = config->collect_net = false;
     config->collect_context_switches = config->collect_running_processes = false;
+    config->collect_memory_fragmentation = false; // Agregar para fragmentación
 
     // Obtener la lista de métricas
     cJSON* metrics = cJSON_GetObjectItem(root, "metrics");
@@ -92,6 +93,10 @@ bool load_config(const char* filename, config_t* config)
                 {
                     config->collect_running_processes = true;
                 }
+                else if (strcmp(metric->valuestring, "memory_fragmentation") == 0)
+                {
+                    config->collect_memory_fragmentation = true;
+                }
             }
             else
             {
@@ -117,6 +122,35 @@ bool load_config(const char* filename, config_t* config)
         printf("Archivo de log no especificado\n");
     }
 
+    // Obtener el método de asignación (opcional)
+    cJSON* allocation_method = cJSON_GetObjectItem(root, "allocation_method");
+    if (cJSON_IsString(allocation_method))
+    {
+        printf("Método de asignación: %s\n", allocation_method->valuestring);
+        if (strcmp(allocation_method->valuestring, "first_fit") == 0)
+        {
+            config->allocation_method = FIRST_FIT;
+        }
+        else if (strcmp(allocation_method->valuestring, "best_fit") == 0)
+        {
+            config->allocation_method = BEST_FIT;
+        }
+        else if (strcmp(allocation_method->valuestring, "worst_fit") == 0)
+        {
+            config->allocation_method = WORST_FIT;
+        }
+        else
+        {
+            printf("Método de asignación desconocido, usando 'first_fit'\n");
+            config->allocation_method = FIRST_FIT;
+        }
+    }
+    else
+    {
+        printf("Método de asignación no especificado, usando 'first_fit'\n");
+        config->allocation_method = FIRST_FIT;
+    }
+
     // Mostrar los estados de las métricas después de la carga
     printf("Estados de métricas:\n");
     printf("  CPU: %s\n", config->collect_cpu ? "Activado" : "Desactivado");
@@ -125,10 +159,12 @@ bool load_config(const char* filename, config_t* config)
     printf("  Red: %s\n", config->collect_net ? "Activado" : "Desactivado");
     printf("  Cambios de contexto: %s\n", config->collect_context_switches ? "Activado" : "Desactivado");
     printf("  Procesos en ejecución: %s\n", config->collect_running_processes ? "Activado" : "Desactivado");
+    printf("  Fragmentación de memoria: %s\n", config->collect_memory_fragmentation ? "Activado" : "Desactivado");
 
     cJSON_Delete(root);
     return true;
 }
+
 
 // Función para construir y enviar métricas a través del FIFO
 void send_metrics(config_t* config)
@@ -166,6 +202,11 @@ void send_metrics(config_t* config)
     {
         cJSON_AddNumberToObject(root, "running_processes", get_running_processes());
     }
+    if (config->collect_memory_fragmentation)
+    {
+        double fragmentation = calculate_memory_fragmentation();
+        cJSON_AddNumberToObject(root, "memory_fragmentation", fragmentation);
+    }
 
     // Convertir el JSON a una cadena
     char* json_string = cJSON_Print(root);
@@ -186,16 +227,13 @@ void send_metrics(config_t* config)
     free(json_string); // Liberar la cadena JSON
 }
 
-void save_sampling_interval(int interval)
-{
+// config.c
+void save_sampling_interval(int interval) {
     FILE* file = fopen("/tmp/sampling_interval.txt", "w");
-    if (file != NULL)
-    {
+    if (file != NULL) {
         fprintf(file, "%d\n", interval);
         fclose(file);
-    }
-    else
-    {
+    } else {
         perror("Error al abrir el archivo para guardar el intervalo de muestreo");
     }
 }

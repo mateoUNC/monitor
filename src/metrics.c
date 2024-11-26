@@ -102,6 +102,13 @@ disk_stats_t get_disk_stats(const char* device)
     disk_stats_t stats = {0};
     strncpy(stats.device, device, sizeof(stats.device) - 1);
 
+    // Remover "/dev/" si está presente
+    const char* device_name = device;
+    if (strncmp(device, "/dev/", 5) == 0)
+    {
+        device_name = device + 5; // Saltar el prefijo "/dev/"
+    }
+
     while (fgets(buffer, sizeof(buffer), fp) != NULL)
     {
         unsigned int major_num, minor_num;
@@ -111,7 +118,7 @@ disk_stats_t get_disk_stats(const char* device)
         int items = sscanf(buffer, "%u %u %31s %lu %*s %*s %*s %lu", &major_num, &minor_num, dev_name, &reads_completed,
                            &writes_completed);
 
-        if (items >= 5 && strcmp(dev_name, device) == 0)
+        if (items >= 5 && strcmp(dev_name, device_name) == 0)
         {
             stats.reads_completed = reads_completed;
             stats.writes_completed = writes_completed;
